@@ -1,0 +1,11 @@
+﻿<div class="alert alert-success" id="errorMessageDiv">
+    <div>
+        <label>Success</label>
+    </div>
+    <pre id="successMessageOutput">@Message</pre>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; }
+}

@@ -1,0 +1,11 @@
+﻿<div class="alert alert-danger" id="errorMessageDiv">
+    <div>
+        <label>Error</label>
+    </div>
+    <pre id="errorMessageOutput">@Message</pre>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; }
+}

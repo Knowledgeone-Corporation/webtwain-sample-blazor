@@ -1,0 +1,309 @@
+﻿@inject IJSRuntime jsRuntime
+@using SampleWebsiteBlazorWasm.Shared
+
+<div>
+    <div class="twain-feature-group">
+        <label>Device</label>
+        <select @onchange="OnDeviceChange" class="form-control">
+            @foreach (var item in MappedDevices)
+            {
+                <option value="@item.Value">@item.Display</option>
+            }
+        </select>
+    </div>
+
+    @if (MappedSources.Count > 0)
+    {
+        <div class="twain-feature-group">
+            <label>Document Source</label>
+
+            <select @onchange="OnSourceChange" class="form-control">
+                @foreach (var item in MappedSources)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+
+        </div>
+    }
+
+    @if (MappedResolutionIds.Count > 0)
+    {
+        <div class="twain-feature-group">
+            <label>Resolution</label>
+
+            <select @bind="SelectedResolutionId" class="form-control">
+                @foreach (var item in MappedResolutionIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+
+        </div>
+    }
+
+    @if (MappedPixelTypeIds.Count > 0)
+    {
+        <div class="twain-feature-group">
+            <label>Color</label>
+
+
+            <select @bind="SelectedPixelTypeId" class="form-control">
+                @foreach (var item in MappedPixelTypeIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (MappedPageSizeIds.Count > 0)
+    {
+        <div class="twain-feature-group">
+            <label>Page Size</label>
+
+            <select @bind="SelectedPageSizeId" class="form-control">
+                @foreach (var item in MappedPageSizeIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (MappedDuplexIds.Count > 0)
+    {
+        <div class="twain-feature-group">
+            <label>Duplex Option</label>
+
+            <select @bind="SelectedDuplexId" class="form-control">
+                @foreach (var item in MappedDuplexIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+
+        </div>
+    }
+
+    @if (MappedFiletypes.Any())
+    {
+        <div class="twain-feature-group">
+            <label>Filetype</label>
+            <select @bind="SelectedFileType" class="form-control">
+                @foreach (var item in MappedFiletypes)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (MappedOcrOptions.Any())
+    {
+        <div class="twain-feature-group">
+            <label>OCR</label>
+            <select @bind="SelectedOcrType" class="form-control">
+
+                @foreach (var item in MappedOcrOptions)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+
+            </select>
+        </div>
+    }
+
+    <div class="twain-feature-group">
+        <label>Filename</label>
+        <input type="text" @bind="Filename" class="form-control" />
+    </div>
+
+    <br />
+
+    <div class="input-group">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick">
+                <span>Scan</span>
+            </button>
+        </div>
+        <input class="form-control filename" aria-label="Text input with multiple buttons" />
+        @if (!string.IsNullOrEmpty(AcquireResponse))
+        {
+            <div class="input-group-btn fileview">
+                <button id="viewBtn2" type="button" class="btn btn-default k1ViewBtn" @onclick="OnViewDocument">View</button>
+            </div>
+        }
+    </div>
+
+    <br />
+
+    @if (!string.IsNullOrEmpty(AcquireResponse))
+    {
+        <ScanCompleted Message="@AcquireResponse"></ScanCompleted>
+    }
+
+    @if (!string.IsNullOrEmpty(AcquireError))
+    {
+        <ScanError Message="@AcquireError"></ScanError>
+    }
+</div>
+
+@code {
+    public DeviceModel SelectedDevice { get; set; } = null;
+    public string SelectedOcrType { get; set; }
+    public string SelectedInterfaceType { get; set; }
+    public string SelectedFileType { get; set; }
+    public List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
+    public TwainOptionsModel TwainOptions { get; set; }
+
+    public List<MappedOption> MappedDevices { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedSources { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedDuplexIds { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedPageSizeIds { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedPixelTypeIds { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedResolutionIds { get; set; } = new List<MappedOption>();
+
+    public List<MappedOption> MappedOcrOptions { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedFiletypes { get; set; } = new List<MappedOption>();
+
+    public string SelectedResolutionId { get; set; }
+    public string SelectedDuplexId { get; set; }
+    public string SelectedPageSizeId { get; set; }
+    public string SelectedPixelTypeId { get; set; }
+    public string SelectedSourceId { get; set; }
+    public string Filename { get; set; }
+
+    public string AcquireResponse;
+    public string AcquireError;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        TwainOptions = await jsRuntime.InvokeAsync<TwainOptionsModel>("k1_Options");
+        await jsRuntime.InvokeVoidAsync("k1_setConfig", TwainOptions.ScannerInterface.Hidden);
+
+        var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
+        var oDevices = await jsRuntime.InvokeAsync<object>("k1_getDevices");
+        Console.WriteLine(oDevices);
+        var devices = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DeviceModel>>(oDevices.ToString());
+
+        MappedDevices = devices.Select(x => new MappedOption { Display = x.Name, Value = x.Id }).ToList();
+        if (MappedDevices.Any())
+        {
+            MappedDevices.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+
+        MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value.ToString() }).ToList();
+        MappedOcrOptions.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+
+        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
+        MappedFiletypes.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+
+        await base.OnInitializedAsync();
+    }
+
+    async void OnClick(MouseEventArgs mouseEventArgs)
+    {
+        AcquireResponse = string.Empty;
+        AcquireError = string.Empty;
+
+        var acquireRequest = new
+        {
+            deviceId = SelectedDevice?.Id ?? "-1",
+            filetype = string.IsNullOrEmpty(SelectedFileType) ? "-1" : SelectedFileType,
+            ocrType = string.IsNullOrEmpty(SelectedOcrType) ? "-1" : SelectedOcrType,
+            filename = string.IsNullOrEmpty(Filename) ? string.Empty : Filename,
+            documentSourceId = string.IsNullOrEmpty(SelectedSourceId) ? "-1" : SelectedSourceId,
+            resolutionId = string.IsNullOrEmpty(SelectedResolutionId) ? "-1" : SelectedResolutionId,
+            pixelTypeId = string.IsNullOrEmpty(SelectedPixelTypeId) ? "-1" : SelectedPixelTypeId,
+            pageSizeId = string.IsNullOrEmpty(SelectedPageSizeId) ? "-1" : SelectedPageSizeId,
+            duplexId = string.IsNullOrEmpty(SelectedDuplexId) ? "-1" : SelectedDuplexId,
+        };
+
+        try
+        {
+            var acquireResponse = await jsRuntime.InvokeAsync<object>("k1_acquire", acquireRequest);
+            AcquireResponse = Newtonsoft.Json.Linq.JToken.Parse(acquireResponse.ToString()).ToString(Newtonsoft.Json.Formatting.Indented);
+        }
+        catch
+        {
+            AcquireError = "Encountered an error. Review console and network logs.";
+        }
+
+        StateHasChanged();
+    }
+
+    async void OnDeviceChange(ChangeEventArgs changeEventArgs)
+    {
+        var oDevice = await jsRuntime.InvokeAsync<object>("k1_devices", changeEventArgs.Value);
+
+        if (oDevice is null)
+        {
+            SelectedDevice = null;
+            MappedSources.Clear();
+            StateHasChanged();
+            return;
+        }
+
+        SelectedDevice = Newtonsoft.Json.JsonConvert.DeserializeObject<DeviceModel>(oDevice.ToString());
+        MappedSources = SelectedDevice.DocumentSourceIds.Select(x => new MappedOption { Display = x.Value.Name, Value = x.Key }).ToList();
+        if (MappedSources.Any())
+        {
+            MappedSources.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+        StateHasChanged();
+    }
+
+    async void OnViewDocument(MouseEventArgs mouseEventArgs)
+    {
+        await jsRuntime.InvokeVoidAsync("k1_viewdocument");
+    }
+
+    void OnSourceChange(ChangeEventArgs changeEventArgs)
+    {
+        var selected = changeEventArgs.Value as string;
+
+        if (!SelectedDevice.DocumentSourceIds.ContainsKey(selected))
+        {
+            MappedDuplexIds = new List<MappedOption>();
+            MappedPageSizeIds = new List<MappedOption>();
+            MappedPixelTypeIds = new List<MappedOption>();
+            MappedResolutionIds = new List<MappedOption>();
+            SelectedResolutionId = string.Empty;
+            SelectedDuplexId = string.Empty;
+            SelectedPageSizeId = string.Empty;
+            SelectedPixelTypeId = string.Empty;
+            SelectedSourceId = string.Empty;
+            return;
+        }
+
+        SelectedSourceId = selected;
+        var selectedDeviceUnit = SelectedDevice.DocumentSourceIds[selected];
+
+        MappedDuplexIds = selectedDeviceUnit.DuplexIds.Select(x => new MappedOption { Display = x.Value, Value = x.Key }).ToList();
+        if (MappedDuplexIds.Any())
+        {
+            MappedDuplexIds.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+
+        MappedPageSizeIds = selectedDeviceUnit.PageSizeIds.Select(x => new MappedOption { Display = x.Value, Value = x.Key }).ToList();
+        if (MappedPageSizeIds.Any())
+        {
+            MappedPageSizeIds.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+
+        MappedPixelTypeIds = selectedDeviceUnit.PixelTypeIds.Select(x => new MappedOption { Display = x.Value, Value = x.Key }).ToList();
+        if (MappedPixelTypeIds.Any())
+        {
+            MappedPixelTypeIds.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+
+        MappedResolutionIds = selectedDeviceUnit.ResolutionIds.Select(x => new MappedOption { Display = x.Value, Value = x.Key }).ToList();
+        if (MappedResolutionIds.Any())
+        {
+            MappedResolutionIds.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,152 @@
+﻿@inject IJSRuntime jsRuntime
+@using SampleWebsiteBlazorWasm.Shared
+
+<div>
+    <div class="twain-feature-group">
+        <label>Device</label>
+        <select @bind="SelectedDevice" class="form-control">
+            @foreach (var item in MappedDevices)
+            {
+                <option value="@item.Value">@item.Display</option>
+            }
+        </select>
+    </div>
+
+
+    @if (MappedFiletypes.Any())
+    {
+        <div class="twain-feature-group">
+            <label>Filetype</label>
+            <select @bind="SelectedFileType" class="form-control">
+                @foreach (var item in MappedFiletypes)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (MappedOcrOptions.Any())
+    {
+        <div class="twain-feature-group">
+            <label>OCR</label>
+            <select @bind="SelectedOcrType" class="form-control">
+
+                @foreach (var item in MappedOcrOptions)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
+
+            </select>
+        </div>
+    }
+
+    <div class="twain-feature-group">
+        <label>Filename</label>
+        <input type="text" @bind="Filename" class="form-control" />
+    </div>
+
+    <br />
+
+    <div class="input-group">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick">
+                <span>Scan</span>
+            </button>
+        </div>
+        <input class="form-control filename" aria-label="Text input with multiple buttons" />
+        @if (!string.IsNullOrEmpty(AcquireResponse))
+        {
+            <div class="input-group-btn fileview">
+                <button id="viewBtn2" type="button" class="btn btn-default k1ViewBtn" @onclick="OnViewDocument">View</button>
+            </div>
+        }
+    </div>
+
+    <br />
+
+    @if (!string.IsNullOrEmpty(AcquireResponse))
+    {
+        <ScanCompleted Message="@AcquireResponse"></ScanCompleted>
+    }
+
+    @if (!string.IsNullOrEmpty(AcquireError))
+    {
+        <ScanError Message="@AcquireError"></ScanError>
+    }
+</div>
+
+
+
+@code {
+    public string SelectedDevice { get; set; }
+    public string SelectedOcrType { get; set; }
+    public string SelectedInterfaceType { get; set; }
+    public string SelectedFileType { get; set; }
+    public List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
+    public TwainOptionsModel TwainOptions { get; set; }
+    public string Filename { get; set; }
+
+    public List<MappedOption> MappedOcrOptions { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedFiletypes { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedDevices { get; set; } = new List<MappedOption>();
+
+    public string AcquireResponse;
+    public string AcquireError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TwainOptions = await jsRuntime.InvokeAsync<TwainOptionsModel>("k1_Options");
+        await jsRuntime.InvokeVoidAsync("k1_setConfig", TwainOptions.ScannerInterface.Desktop);
+
+        var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
+        var oDevices = await jsRuntime.InvokeAsync<object>("k1_getDevices");
+        Console.WriteLine(oDevices);
+
+        var devices = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DeviceModel>>(oDevices.ToString());
+        MappedDevices = devices.Select(x => new MappedOption { Display = x.Name, Value = x.Id }).ToList();
+        if (MappedDevices.Any())
+        {
+            MappedDevices.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+        }
+
+        MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value.ToString() }).ToList();
+        MappedOcrOptions.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+
+        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
+        MappedFiletypes.Insert(0, new MappedOption { Display = "Please select...", Value = "-1" });
+
+        await base.OnInitializedAsync();
+    }
+
+    async void OnViewDocument(MouseEventArgs mouseEventArgs)
+    {
+        await jsRuntime.InvokeVoidAsync("k1_viewdocument");
+    }
+
+    async void OnClick(MouseEventArgs mouseEventArgs)
+    {
+        AcquireResponse = string.Empty;
+        AcquireError = string.Empty;
+
+        var acquireRequest = new
+        {
+            deviceId = SelectedDevice,
+            filetype = SelectedFileType,
+            ocrType = SelectedOcrType,
+            filename = Filename,
+        };
+
+        try
+        {
+            var acquireResponse = await jsRuntime.InvokeAsync<object>("k1_acquire", acquireRequest);
+            AcquireResponse = Newtonsoft.Json.Linq.JToken.Parse(acquireResponse.ToString()).ToString(Newtonsoft.Json.Formatting.Indented);
+        }
+        catch
+        {
+            AcquireError = "Encountered an error. Review console and network logs.";
+        }
+
+        StateHasChanged();
+    }
+}

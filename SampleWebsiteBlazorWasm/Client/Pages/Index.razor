@@ -1,0 +1,48 @@
+﻿@page "/"
+
+<div>
+    <h1>Scan Demo Page</h1>
+</div>
+<div class="alert alert-info alert-dismissible show" role="alert">
+    <strong>Note: </strong>The demonstration service has the following limitations;
+    - generated documents contain a watermark,
+    - multi-page documents are limited to 10 pages,
+    - OCR is limited to the first page of the document.
+    These limitations are not present in the licensed product.
+</div>
+
+<div class="form-group">
+    <label>Interface Option</label>
+    <div>
+        <select id="interface-option-dropdown" class="form-control" @bind="SelectedInterface">
+            <option value>Please select...</option>
+            <option value="0">Hidden</option>
+            <option value="1">Visible</option>
+            <option value="2">Web</option>
+            <option value="3">Desktop</option>
+        </select>
+    </div>
+
+    @switch (SelectedInterface)
+    {
+        case 0:
+            <ScannerInterfaceHidden></ScannerInterfaceHidden>
+            break;
+        case 1:
+            <ScannerInterfaceVisible></ScannerInterfaceVisible>
+            break;
+        case 2:
+            <ScannerInterfaceWeb></ScannerInterfaceWeb>
+            break;
+        case 3:
+            <ScannerInterfaceDesktop></ScannerInterfaceDesktop>
+            break;
+        default:
+            <div></div>
+            break;
+    }
+</div>
+
+@code {
+    public int? SelectedInterface { get; set; }
+}

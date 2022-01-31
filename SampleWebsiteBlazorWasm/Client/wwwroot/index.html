@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SampleWebsiteBlazorWasm</title>
+    <base href="/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/k1scanservice/js/k1ss.js"></script>
+    <link href="lib/k1scanservice/css/k1ss.css" rel="stylesheet" />
+</head>
+
+<body>
+    <app>Loading...</app>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        var configuration = {};
+
+        function k1_Options() {
+            return K1WebTwain.Options;
+        }
+
+        function k1_setConfig(interfaceType) {
+            configuration = {
+                onComplete: function (data) { },
+                viewButton: $(".k1ViewBtn"),
+                fileUploadURL: document.location.origin + '/Home/UploadFile',
+                clientID: "" + Date.now(),
+                setupFile: document.location.origin + '/Home/DownloadSetup',
+                interfacePath: "",
+                scannerInterface: interfaceType,
+                scanButton: $("#scanbtn"),
+            };
+        }
+
+        function k1_devices(deviceId) {
+            return K1WebTwain.Device(deviceId);
+        }
+
+        async function k1_renderDesktop() {
+            configuration.onComplete = function (data) {
+
+            };
+            return await K1WebTwain.Configure(configuration);
+        }
+
+        async function k1_renderVisible() {
+            configuration.onComplete = function (data) {
+
+            };
+            return await K1WebTwain.Configure(configuration);
+        }
+
+        async function k1_renderHidden() {
+            configuration.onComplete = function (data) {
+
+            };
+            return await K1WebTwain.Configure(configuration);
+        }
+
+        async function k1_renderWeb() {
+            configuration.onComplete = function (data) {
+
+            };
+            return await K1WebTwain.Configure(configuration);
+        }
+
+        async function k1_getDevices() {
+            return await K1WebTwain.GetDevices();
+        }
+
+        async function k1_acquire(request) {
+            console.log(request);
+            return await K1WebTwain.Acquire(request);
+        }
+
+        function k1_viewdocument() {
+            window.location = "http://127.0.0.1:9098/api/service/GetDocument";
+        }
+    </script>
+</body>
+</html>
