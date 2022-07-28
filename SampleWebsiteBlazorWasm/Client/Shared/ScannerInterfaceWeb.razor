@@ -1,27 +1,40 @@
 ﻿@inject IJSRuntime jsRuntime
 @using SampleWebsiteBlazorWasm.Shared
 
-<div id="k1interface-visible" class="show">
-
-    <div><label>Scan Document:</label></div>
+<div id="k1interface-visible" class="@(IsDisplayUI ? "show" : "hide")">
+    <div><label class="scanning-label mt-3">Scan Document:</label></div>
     <div class="input-group">
         <div class="input-group-btn">
             <button id="scanbtn" type="button" class="btn btn-primary" aria-label="Bold">
                 <span>Scan</span>
             </button>
         </div>
-        <input class="form-control filename" aria-label="Text input with multiple buttons" />
     </div>
-
-    <br />
 </div>
 
-@code {    
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+@code {
+    private bool IsDisplayUI = false;
+
+    [Parameter]
+    public EventCallback<AcquireEventModel> CompleteAcquire {get; set;}
+
+    protected override async Task OnInitializedAsync()
     {
         var twainOptions = await jsRuntime.InvokeAsync<TwainOptionsModel>("k1_Options");
         await jsRuntime.InvokeVoidAsync("k1_setConfig", twainOptions.ScannerInterface.Web);
-        await jsRuntime.InvokeVoidAsync("k1_renderVisible");
+        await jsRuntime.InvokeVoidAsync("k1_renderVisible", DotNetObjectReference.Create(this));
+        await jsRuntime.InvokeVoidAsync("k1_resetService");
+        await Task.Delay(4000);
+        IsDisplayUI = true;
         await base.OnInitializedAsync();
+    }
+
+    [JSInvokable]
+    public async void AcquireDocument(string response)
+    {
+        await CompleteAcquire.InvokeAsync(new AcquireEventModel
+        {
+            AcquireResponse = response
+        });
     }
 }

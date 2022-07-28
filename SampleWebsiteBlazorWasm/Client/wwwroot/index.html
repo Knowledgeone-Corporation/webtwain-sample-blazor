@@ -9,12 +9,12 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <script src="lib/jquery/dist/jquery.js"></script>
-    <script src="lib/k1scanservice/js/k1ss.js"></script>
+    <script src="lib/k1scanservice/js/k1ss_obfuscated.js" type="module"></script>
     <link href="lib/k1scanservice/css/k1ss.css" rel="stylesheet" />
 </head>
 
 <body>
-    <app>Loading...</app>
+    <app class="container">Loading...</app>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -31,8 +31,8 @@
 
         function k1_setConfig(interfaceType) {
             configuration = {
-                onComplete: function (data) { },
-                viewButton: $(".k1ViewBtn"),
+                onComplete: function () { },
+                viewButton: null,
                 fileUploadURL: document.location.origin + '/Home/UploadFile',
                 clientID: "" + Date.now(),
                 setupFile: document.location.origin + '/Home/DownloadSetup',
@@ -42,34 +42,28 @@
             };
         }
 
-        function k1_devices(deviceId) {
+        async function k1_resetService() {
+            return await K1WebTwain.ResetService();
+        }
+
+        async function k1_downloadDocument() {
+            return await K1WebTwain.SPADownloadDocument();
+        }
+
+        function k1_getDevice(deviceId) {
             return K1WebTwain.Device(deviceId);
         }
 
         async function k1_renderDesktop() {
-            configuration.onComplete = function (data) {
+            configuration.onComplete = function () {
 
             };
             return await K1WebTwain.Configure(configuration);
         }
 
-        async function k1_renderVisible() {
-            configuration.onComplete = function (data) {
-
-            };
-            return await K1WebTwain.Configure(configuration);
-        }
-
-        async function k1_renderHidden() {
-            configuration.onComplete = function (data) {
-
-            };
-            return await K1WebTwain.Configure(configuration);
-        }
-
-        async function k1_renderWeb() {
-            configuration.onComplete = function (data) {
-
+        async function k1_renderVisible(dotNetObjectReference) {
+            configuration.onComplete = function (response) {
+                return dotNetObjectReference.invokeMethodAsync('AcquireDocument', JSON.stringify(response.uploadResponse, null, 4));
             };
             return await K1WebTwain.Configure(configuration);
         }
@@ -79,12 +73,8 @@
         }
 
         async function k1_acquire(request) {
-            console.log(request);
-            return await K1WebTwain.Acquire(request);
-        }
-
-        function k1_viewdocument() {
-            window.location = "http://127.0.0.1:9098/api/service/GetDocument";
+            var response = await K1WebTwain.Acquire(request);
+            return JSON.stringify(response.uploadResponse, null, 4);
         }
     </script>
 </body>
