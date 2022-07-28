@@ -1,4 +1,6 @@
 ﻿@page "/"
+@inject IJSRuntime jsRuntime
+@using SampleWebsiteBlazorWasm.Shared
 
 <div>
     <h1>Scan Demo Page: Blazor</h1>
@@ -12,37 +14,68 @@
 </div>
 
 <div class="form-group">
-    <label>Interface Option</label>
+    <label class="scanning-label">Interface Option</label>
     <div>
         <select id="interface-option-dropdown" class="form-control" @bind="SelectedInterface">
-            <option value>Please select...</option>
-            <option value="0">Hidden: no user interface will be shown</option>
-            <option value="1">Visible: WebTWAIN user interface will be shown</option>
-            <option value="2">Web: only the WebTWAIN user interface will be shown</option>
-            <option value="3">Desktop: only the scanner's TWAIN user interface will be shown</option>
+            <option value="-1">Please select...</option>
+            <option value="0">Hidden : Not using Webtwain or Native UI</option>
+            <option value="1">Visible : Uses Webtwain and Native UI</option>
+            <option value="2">Web : only uses Webtwain UI</option>
+            <option value="3">Desktop : only uses Native scanner UI</option>
         </select>
     </div>
 
     @switch (SelectedInterface)
     {
         case 0:
-            <ScannerInterfaceHidden></ScannerInterfaceHidden>
+            <ScannerInterfaceHidden CompleteAcquire="CompleteAcquire"></ScannerInterfaceHidden>
             break;
         case 1:
-            <ScannerInterfaceVisible></ScannerInterfaceVisible>
+            <ScannerInterfaceVisible CompleteAcquire="CompleteAcquire"></ScannerInterfaceVisible>
             break;
         case 2:
-            <ScannerInterfaceWeb></ScannerInterfaceWeb>
+            <ScannerInterfaceWeb CompleteAcquire="CompleteAcquire"></ScannerInterfaceWeb>
             break;
         case 3:
-            <ScannerInterfaceDesktop></ScannerInterfaceDesktop>
+            <ScannerInterfaceDesktop CompleteAcquire="CompleteAcquire"></ScannerInterfaceDesktop>
             break;
         default:
             <div></div>
             break;
     }
+
+    <br />
+
+    @if (!string.IsNullOrEmpty(AcquireEvent.AcquireResponse))
+    {
+        <ScanCompleted Message="@AcquireEvent.AcquireResponse"></ScanCompleted>
+    }
+
+    @if (!string.IsNullOrEmpty(AcquireEvent.AcquireError))
+    {
+        <ScanError Message="@AcquireEvent.AcquireError"></ScanError>
+    }
 </div>
 
 @code {
-    public int? SelectedInterface { get; set; }
+    private int? _selectedInterface;
+
+    public AcquireEventModel AcquireEvent = new AcquireEventModel();
+
+    public int? SelectedInterface
+    {
+        get => _selectedInterface;
+        set
+        {
+            _selectedInterface = value;
+            AcquireEvent = new AcquireEventModel();
+        }
+    }
+
+    private void CompleteAcquire(AcquireEventModel acquireEvent)
+    {
+        SelectedInterface = -1;
+        AcquireEvent = acquireEvent;
+        StateHasChanged();
+    }
 }

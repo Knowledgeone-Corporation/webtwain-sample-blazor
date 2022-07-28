@@ -1,11 +1,21 @@
-﻿<div class="alert alert-success" id="errorMessageDiv">
+﻿@inject IJSRuntime jsRuntime
+
+<div class="alert alert-success" id="errorMessageDiv">
     <div>
-        <label>Success</label>
+        <label class="scanning-label">Success</label>
     </div>
     <pre id="successMessageOutput">@Message</pre>
+     <div class="input-group-btn fileview">
+        <button id="viewBtn2" type="button" class="btn btn-default k1ViewBtn" @onclick="DownloadDocument">View</button>
+    </div>
 </div>
 
 @code {
     [Parameter]
     public string Message { get; set; }
+
+    private async Task DownloadDocument()
+    {
+        await jsRuntime.InvokeVoidAsync("k1_downloadDocument");
+    }
 }
