@@ -9,7 +9,7 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <script src="lib/jquery/dist/jquery.js"></script>
-    <script src="lib/k1scanservice/js/k1ss_obfuscated.js" type="module"></script>
+    <script src="lib/k1scanservice/js/k1ss.js" type="module"></script>
     <link href="lib/k1scanservice/css/k1ss.css" rel="stylesheet" />
 </head>
 
@@ -70,7 +70,18 @@
 
         async function k1_renderVisible(dotNetObjectReference) {
             configuration.onComplete = function (response) {
-                return dotNetObjectReference.invokeMethodAsync('AcquireDocument', JSON.stringify(response.uploadResponse, null, 4));
+                let responseMessage = response.uploadResponse;
+
+                var isUpload = response.saveToType == K1WebTwain.Options.SaveToType.Upload;
+                if (!isUpload) {
+                    responseMessage = {
+                        filename: response.filename,
+                        fileSize: `${response.fileLength} (${response.sizeDisplay})`,
+                        fileExtention: response.extension
+                    };
+                }
+
+                return dotNetObjectReference.invokeMethodAsync('AcquireDocument', JSON.stringify(responseMessage, null, 4), isUpload);
             };
             return await K1WebTwain.Configure(configuration);
         }
@@ -81,7 +92,17 @@
 
         async function k1_acquire(request) {
             var response = await K1WebTwain.Acquire(request);
-            return JSON.stringify(response.uploadResponse, null, 4);
+            let responseMessage = response.uploadResponse; 
+
+            if (request.saveToType == K1WebTwain.Options.SaveToType.Local) {
+                responseMessage = {
+                    filename: response.filename,
+                    fileSize: `${response.fileLength} (${response.sizeDisplay})`,
+                    fileExtention: response.extension
+                };
+            }
+
+            return JSON.stringify(responseMessage, null, 4);
         }
     </script>
 </body>

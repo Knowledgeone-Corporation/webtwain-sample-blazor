@@ -33,12 +33,11 @@
         {
             <div class="twain-feature-group">
                 <label class="scanning-label mt-2">Resolution</label>
-
                 <select @bind="SelectedResolutionId" class="form-control">
-                    @foreach (var item in MappedResolutionIds)
-                    {
-                        <option value="@item.Value">@item.Display</option>
-                    }
+                @foreach (var item in MappedResolutionIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
                 </select>
 
             </div>
@@ -48,12 +47,11 @@
         {
             <div class="twain-feature-group">
                 <label class="scanning-label mt-2">Color</label>
-
                 <select @bind="SelectedPixelTypeId" class="form-control">
-                    @foreach (var item in MappedPixelTypeIds)
-                    {
-                        <option value="@item.Value">@item.Display</option>
-                    }
+                @foreach (var item in MappedPixelTypeIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
                 </select>
             </div>
         }
@@ -62,12 +60,11 @@
         {
             <div class="twain-feature-group">
                 <label class="scanning-label mt-2">Page Size</label>
-
                 <select @bind="SelectedPageSizeId" class="form-control">
-                    @foreach (var item in MappedPageSizeIds)
-                    {
-                        <option value="@item.Value">@item.Display</option>
-                    }
+                @foreach (var item in MappedPageSizeIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
                 </select>
             </div>
         }
@@ -76,21 +73,24 @@
         {
             <div class="twain-feature-group">
                 <label class="scanning-label mt-2">Duplex Option</label>
-
                 <select @bind="SelectedDuplexId" class="form-control">
-                    @foreach (var item in MappedDuplexIds)
-                    {
-                        <option value="@item.Value">@item.Display</option>
-                    }
+                @foreach (var item in MappedDuplexIds)
+                {
+                    <option value="@item.Value">@item.Display</option>
+                }
                 </select>
-
             </div>
         }
+
+        <div class="twain-feature-group">
+            <label class="scanning-label mt-2">Output File Name</label>
+            <input type="text" @bind="Filename" class="form-control" />
+        </div>
 
         @if (MappedFiletypes.Any())
         {
             <div class="twain-feature-group">
-                <label class="scanning-label mt-2">Filetype</label>
+                <label class="scanning-label mt-2">Output File Type</label>
                 <select @bind="SelectedFileType" class="form-control">
                     @foreach (var item in MappedFiletypes)
                     {
@@ -103,10 +103,22 @@
         @if (MappedOcrOptions.Any())
         {
             <div class="twain-feature-group">
-                <label class="scanning-label mt-2">OCR</label>
+                <label class="scanning-label mt-2">OCR Type</label>
                 <select @bind="SelectedOcrType" class="form-control">
-
                     @foreach (var item in MappedOcrOptions)
+                    {
+                        <option value="@item.Value">@item.Display</option>
+                    }
+                </select>
+            </div>
+        }
+
+        @if (MappedSaveToOptions.Any())
+        {
+            <div class="twain-feature-group">
+                <label class="scanning-label mt-2">Save To</label>
+                <select @bind="SelectedSaveToType" class="form-control">
+                    @foreach (var item in MappedSaveToOptions)
                     {
                         <option value="@item.Value">@item.Display</option>
                     }
@@ -114,11 +126,6 @@
                 </select>
             </div>
         }
-
-        <div class="twain-feature-group">
-            <label class="scanning-label mt-2">Filename</label>
-            <input type="text" @bind="Filename" class="form-control" />
-        </div>
 
         <br />
 
@@ -139,6 +146,7 @@
     public string SelectedOcrType { get; set; }
     public string SelectedInterfaceType { get; set; }
     public string SelectedFileType { get; set; }
+    public string SelectedSaveToType { get; set; }
     public List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
     public TwainOptionsModel TwainOptions { get; set; }
 
@@ -151,6 +159,7 @@
 
     public List<MappedOption> MappedOcrOptions { get; set; } = new List<MappedOption>();
     public List<MappedOption> MappedFiletypes { get; set; } = new List<MappedOption>();
+    public List<MappedOption> MappedSaveToOptions { get; set; } = new List<MappedOption>();
 
     public string SelectedResolutionId { get; set; }
     public string SelectedDuplexId { get; set; }
@@ -178,11 +187,13 @@
         MappedDevices = devices.Select(x => new MappedOption { Display = x.Name, Value = x.Id }).ToList();
         MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
         MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
+        MappedSaveToOptions = TwainOptions.SaveToType.SaveToTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
 
         SelectedDevice = devices.FirstOrDefault();
         OnDeviceChange(devices.FirstOrDefault()?.Id);
         SelectedOcrType = MappedOcrOptions.FirstOrDefault()?.Value;
         SelectedFileType = MappedFiletypes.FirstOrDefault()?.Value;
+        SelectedSaveToType = MappedSaveToOptions.FirstOrDefault()?.Value;
         Filename = $"ScanFile{new Random().Next(2000000)}";
 
         await base.OnInitializedAsync();
@@ -202,6 +213,7 @@
             pixelTypeId = string.IsNullOrEmpty(SelectedPixelTypeId) ? "-1" : SelectedPixelTypeId,
             pageSizeId = string.IsNullOrEmpty(SelectedPageSizeId) ? "-1" : SelectedPageSizeId,
             duplexId = string.IsNullOrEmpty(SelectedDuplexId) ? "-1" : SelectedDuplexId,
+            saveToType = SelectedSaveToType
         };
 
         try
@@ -210,7 +222,8 @@
 
             await CompleteAcquire.InvokeAsync(new AcquireEventModel
             {
-                AcquireResponse = acquireResponse
+                AcquireResponse = acquireResponse,
+                IsUpload = SelectedSaveToType == TwainOptions.SaveToType.Upload.ToString()
             });
         }
         catch
