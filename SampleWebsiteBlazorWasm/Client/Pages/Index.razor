@@ -48,7 +48,7 @@
 
     @if (!string.IsNullOrEmpty(AcquireEvent.AcquireResponse))
     {
-        <ScanCompleted Message="@AcquireEvent.AcquireResponse"></ScanCompleted>
+        <ScanCompleted Message="@AcquireEvent.AcquireResponse" IsUpload="@AcquireEvent.IsUpload"></ScanCompleted>
     }
 
     @if (!string.IsNullOrEmpty(AcquireEvent.AcquireError))

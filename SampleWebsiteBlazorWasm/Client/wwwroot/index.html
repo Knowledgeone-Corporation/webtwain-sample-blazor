@@ -9,7 +9,7 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <script src="lib/jquery/dist/jquery.js"></script>
-    <script src="lib/k1scanservice/js/k1ss_obfuscated.js" type="module"></script>
+    <script src="lib/k1scanservice/js/k1ss.js" type="module"></script>
     <link href="lib/k1scanservice/css/k1ss.css" rel="stylesheet" />
 </head>
 
@@ -31,14 +31,21 @@
 
         function k1_setConfig(interfaceType) {
             configuration = {
-                onComplete: function () { },
-                viewButton: null,
-                fileUploadURL: document.location.origin + '/Home/UploadFile',
-                clientID: "" + Date.now(),
-                setupFile: document.location.origin + '/Home/DownloadSetup',
-                interfacePath: "",
+                onComplete: function () { }, //function called when scan complete
+                viewButton: null, //This is optional. Specify a element that when clicked will view scanned document
+                fileUploadURL: document.location.origin + '/Home/UploadFile', //This is the service that the scanned document will be uploaded to when complete
+                fileUploadHeaders: [
+                    {
+                        key: "X-Access-Token",
+                        value: "Test"
+                    }
+                ], // This is optional. Specify additional headers for the request to the upload server.
+                clientID: "" + Date.now(), //This is a way to identify the user who is scanning.  It should be unique per user.  Session ID could be used if no user logged in
+                setupFile: document.location.origin + '/Home/DownloadSetup', //location of the installation file if service doesn't yet exist
+                licenseFile: document.location.origin + '/Home/K1Licence', //location of the license file If it unset, value will fallback to Current website url + '/Home/K1Licence'
+                interfacePath: "", // This is optional if your application lives under a subdomain.
                 scannerInterface: interfaceType,
-                scanButton: $("#scanbtn"),
+                scanButton: $("#scanbtn"),// the scan button
             };
         }
 
@@ -63,7 +70,18 @@
 
         async function k1_renderVisible(dotNetObjectReference) {
             configuration.onComplete = function (response) {
-                return dotNetObjectReference.invokeMethodAsync('AcquireDocument', JSON.stringify(response.uploadResponse, null, 4));
+                let responseMessage = response.uploadResponse;
+
+                var isUpload = response.saveToType == K1WebTwain.Options.SaveToType.Upload;
+                if (!isUpload) {
+                    responseMessage = {
+                        filename: response.filename,
+                        fileSize: `${response.fileLength} (${response.sizeDisplay})`,
+                        fileExtention: response.extension
+                    };
+                }
+
+                return dotNetObjectReference.invokeMethodAsync('AcquireDocument', JSON.stringify(responseMessage, null, 4), isUpload);
             };
             return await K1WebTwain.Configure(configuration);
         }
@@ -74,7 +92,17 @@
 
         async function k1_acquire(request) {
             var response = await K1WebTwain.Acquire(request);
-            return JSON.stringify(response.uploadResponse, null, 4);
+            let responseMessage = response.uploadResponse; 
+
+            if (request.saveToType == K1WebTwain.Options.SaveToType.Local) {
+                responseMessage = {
+                    filename: response.filename,
+                    fileSize: `${response.fileLength} (${response.sizeDisplay})`,
+                    fileExtention: response.extension
+                };
+            }
+
+            return JSON.stringify(responseMessage, null, 4);
         }
     </script>
 </body>

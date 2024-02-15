@@ -30,11 +30,12 @@
     }
 
     [JSInvokable]
-    public async void AcquireDocument(string response)
+    public async void AcquireDocument(string response, bool isUpload)
     {
         await CompleteAcquire.InvokeAsync(new AcquireEventModel
         {
-            AcquireResponse = response
+            AcquireResponse = response,
+            IsUpload = isUpload
         });
     }
 }

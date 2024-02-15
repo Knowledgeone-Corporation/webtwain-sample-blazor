@@ -2,17 +2,20 @@
 
 <div class="alert alert-success" id="errorMessageDiv">
     <div>
-        <label class="scanning-label">Success</label>
+        <label class="scanning-label">@(IsUpload ? "Response from file upload route:" : "File Info:")</label>
     </div>
     <pre id="successMessageOutput">@Message</pre>
      <div class="input-group-btn fileview">
-        <button id="viewBtn2" type="button" class="btn btn-default k1ViewBtn" @onclick="DownloadDocument">View</button>
+        <button id="viewBtn2" type="button" class="btn btn-default k1ViewBtn" @onclick="DownloadDocument">@(IsUpload ? "View" : "Download")</button>
     </div>
 </div>
 
 @code {
     [Parameter]
     public string Message { get; set; }
+
+    [Parameter]
+    public bool IsUpload { get; set; }
 
     private async Task DownloadDocument()
     {
