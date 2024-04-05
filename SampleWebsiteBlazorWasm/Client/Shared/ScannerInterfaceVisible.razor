@@ -6,7 +6,7 @@
     <div class="input-group">
         <div class="input-group-btn">
             <button id="scanbtn" type="button" class="btn btn-primary" aria-label="Bold">
-                <span>Scan</span>
+                <span>Initialize</span>
             </button>
         </div>
     </div>
@@ -24,7 +24,7 @@
         await jsRuntime.InvokeVoidAsync("k1_setConfig", twainOptions.ScannerInterface.Visible);
         await jsRuntime.InvokeVoidAsync("k1_renderVisible", DotNetObjectReference.Create(this));
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        await Task.Delay(4000);
+        // await Task.Delay(4000);
         IsDisplayUI = true;
         await base.OnInitializedAsync();
     }
