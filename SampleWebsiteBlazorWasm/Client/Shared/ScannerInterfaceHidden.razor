@@ -131,7 +131,7 @@
 
         <div class="input-group">
             <div class="input-group-btn">
-                <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick">
+                <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick" disabled="@IsDisableScanButton">
                     <span>Scan</span>
                 </button>
             </div>
@@ -141,6 +141,7 @@
 
 @code {
     private bool IsDisplayUI = false;
+    private bool IsDisableScanButton = true;
 
     public DeviceModel SelectedDevice { get; set; } = null;
     public string SelectedOcrType { get; set; }
@@ -178,12 +179,12 @@
 
         var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        await Task.Delay(4000);
+        // await Task.Delay(4000);
         IsDisplayUI = true;
 
         var oDevices = await jsRuntime.InvokeAsync<object>("k1_getDevices");
         var devices = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DeviceModel>>(oDevices.ToString());
-        
+
         MappedDevices = devices.Select(x => new MappedOption { Display = x.Name, Value = x.Id }).ToList();
         MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
         MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption { Display = x.Key, Value = x.Value }).ToList();
@@ -243,12 +244,23 @@
 
         if (oDevice is null)
         {
+            IsDisableScanButton = true;
             SelectedDevice = null;
+            MappedDuplexIds = new List<MappedOption>();
+            MappedPageSizeIds = new List<MappedOption>();
+            MappedPixelTypeIds = new List<MappedOption>();
+            MappedResolutionIds = new List<MappedOption>();
+            SelectedResolutionId = string.Empty;
+            SelectedDuplexId = string.Empty;
+            SelectedPageSizeId = string.Empty;
+            SelectedPixelTypeId = string.Empty;
+            SelectedSourceId = string.Empty;
             MappedSources.Clear();
             StateHasChanged();
             return;
         }
 
+        IsDisableScanButton = false;
         SelectedDevice = Newtonsoft.Json.JsonConvert.DeserializeObject<DeviceModel>(oDevice.ToString());
         MappedSources = SelectedDevice.DocumentSourceIds.Select(x => new MappedOption { Display = x.Value.Name, Value = x.Key }).ToList();
         if(MappedSources != null && MappedSources.Any() && MappedSources.FirstOrDefault() != null)

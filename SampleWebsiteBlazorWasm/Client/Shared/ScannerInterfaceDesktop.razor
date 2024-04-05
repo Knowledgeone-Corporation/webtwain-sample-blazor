@@ -6,7 +6,7 @@
     <div>
     <div class="twain-feature-group">
         <label class="scanning-label mt-2">Device</label>
-        <select @bind="SelectedDevice" class="form-control">
+        <select class="form-control" @onchange="@((ChangeEventArgs eventArgs) => OnDeviceChange(eventArgs?.Value?.ToString()))">
             @foreach (var item in MappedDevices)
             {
                 <option value="@item.Value">@item.Display</option>
@@ -65,7 +65,7 @@
 
     <div class="input-group">
         <div class="input-group-btn">
-            <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick">
+            <button type="button" class="btn btn-primary" aria-label="Bold" @onclick="OnClick" disabled="@IsDisableScanButton">
                 <span>Scan</span>
             </button>
         </div>
@@ -75,6 +75,7 @@
 
 @code {
     private bool IsDisplayUI = false;
+    private bool IsDisableScanButton = true;
 
     public string SelectedDevice { get; set; }
     public string SelectedOcrType { get; set; }
@@ -99,7 +100,7 @@
 
         var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        await Task.Delay(4000);
+        // await Task.Delay(4000);
         IsDisplayUI = true;
 
         var oDevices = await jsRuntime.InvokeAsync<object>("k1_getDevices");
@@ -117,6 +118,12 @@
         Filename = $"ScanFile{new Random().Next(2000000)}";
 
         await base.OnInitializedAsync();
+    }
+
+    async void OnDeviceChange(string deviceId)
+    {
+        SelectedDevice = deviceId;
+        IsDisableScanButton = int.Parse(deviceId) == -1;
     }
 
     async void OnClick(MouseEventArgs mouseEventArgs)
