@@ -1,4 +1,4 @@
-﻿namespace SampleWebsiteBlazorWasm.Shared
+﻿namespace SampleWebsiteBlazorWasm.Shared.Models
 {
     public class TwainOptionsModel
     {
@@ -8,4 +8,5 @@
         public OutputFileTypeModel OutputFileType { get; set; }
         public SaveToTypeModel SaveToType { get; set; }
     }
+
 }

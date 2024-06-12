@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SampleWebsiteBlazorWasm.Shared
+namespace SampleWebsiteBlazorWasm.Shared.Models
 {
     public class ScannerInterfaceModel
     {

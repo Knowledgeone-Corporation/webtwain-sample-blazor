@@ -104,6 +104,99 @@
 
             return JSON.stringify(responseMessage, null, 4);
         }
+
+        async function k1_startScan(request) {
+            return await K1WebTwain.StartScan(request);
+        }
+
+        async function k1_clearAllScannedPages() {
+            return await K1WebTwain.ClearAllScannedPages();
+        }
+
+        async function k1_generateDocument(request) {
+            K1WebTwain.ValidatePageSize({
+                filetype: request.fileType,
+                ocrType: request.ocrType,
+                saveToType: request.saveToType,
+                generateDocument: async() => {
+                    try {
+                        let response = await K1WebTwain.GenerateDocument({
+                            filetype: request.fileType,
+                            ocrType: request.ocrType,
+                            saveToType: request.saveToType,
+                            filename: request.outputFilename,
+                        });
+                        let responseMessage = response.uploadResponse;
+
+                        if (request.saveToType == K1WebTwain.Options.SaveToType.Local) {
+                            responseMessage = {
+                                filename: response.filename,
+                                fileSize: `${response.fileLength} (${response.sizeDisplay})`,
+                                fileExtension: response.extension
+                            };
+                        }
+                        await DotNet.invokeMethodAsync('SampleWebsiteBlazorWasm.Client', request.callbackFunctionName, JSON.stringify({
+                            isError: false,
+                            responseText: JSON.stringify(responseMessage, null, 4)
+                        }));
+                    } catch (err) {
+                        await DotNet.invokeMethodAsync('SampleWebsiteBlazorWasm.Client', request.callbackFunctionName, JSON.stringify({
+                            isError: true,
+                            responseText: err.responseText
+                        }));
+                    }
+                },
+            });
+        }
+
+        async function saveDefaultScanSettings(outputType, ocrType, scanSource) {
+            let isUseOcr = (outputType === K1WebTwain.Options.OutputFiletype.PDF ||
+                outputType === K1WebTwain.Options.OutputFiletype['PDF/A']) &&
+                parseInt(ocrType) !== K1WebTwain.Options.OcrType.None;
+
+            let strSettings = JSON.stringify({
+                ScanType: outputType,
+                UseOCR: isUseOcr,
+                OCRType: ocrType,
+                ScanSource: scanSource
+            });
+
+            let set_cookies = function (name, value, days) {
+                let expires = "";
+                if (days) {
+                    let date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            };
+
+            set_cookies("DefaultScanSettings", strSettings, 365);
+        }
+
+        async function getDefaultScanSettings() {
+            let get_cookie = function (name) {
+                let nameEQ = name + "=";
+                let ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            };
+
+            let strCookie = get_cookie("DefaultScanSettings");
+            if (strCookie != null) {
+                try {
+                    return JSON.parse(strCookie);
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            return null;
+        }
     </script>
 </body>
 </html>
