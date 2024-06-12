@@ -1,9 +1,9 @@
-﻿namespace SampleWebsiteBlazorWasm.Shared
+﻿namespace SampleWebsiteBlazorWasm.Shared.Models
 {
     public class AcquireEventModel
     {
         public string AcquireResponse { get; set; } = string.Empty;
         public string AcquireError { get; set; } = string.Empty;
         public bool IsUpload { get; set; } = true;
-    }    
+    }
 }

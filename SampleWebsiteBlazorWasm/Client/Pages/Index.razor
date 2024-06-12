@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject IJSRuntime jsRuntime
-@using SampleWebsiteBlazorWasm.Shared
+@inject DocumentGenerationService DocumentService
+@using SampleWebsiteBlazorWasm.Shared.Models
 
 <div>
     <h1>Scan Demo Page: Blazor</h1>
@@ -72,10 +73,20 @@
         }
     }
 
+    protected override void OnInitialized()
+    {
+        DocumentService.OnDocumentGenerated += CompleteAcquire;
+    }
+
     private void CompleteAcquire(AcquireEventModel acquireEvent)
     {
         SelectedInterface = -1;
         AcquireEvent = acquireEvent;
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        DocumentService.OnDocumentGenerated -= CompleteAcquire;
     }
 }

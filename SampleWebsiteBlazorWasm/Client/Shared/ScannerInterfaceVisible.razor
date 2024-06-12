@@ -1,8 +1,8 @@
-﻿@inject IJSRuntime jsRuntime
-@using SampleWebsiteBlazorWasm.Shared
+﻿@using SampleWebsiteBlazorWasm.Shared.Models
+@inject IJSRuntime jsRuntime
 
 <div id="k1interface-visible" class="@(IsDisplayUI ? "show" : "hide")">
-    <div><label class="scanning-label mt-3">Scan Document:</label></div>
+    <div><label class="scanning-label mt-3">Initialize Scan Process:</label></div>
     <div class="input-group">
         <div class="input-group-btn">
             <button id="scanbtn" type="button" class="btn btn-primary" aria-label="Bold">
@@ -30,7 +30,7 @@
     }
 
     [JSInvokable]
-    public async void AcquireDocument(string response, bool isUpload)
+    public async Task AcquireDocument(string response, bool isUpload)
     {
         await CompleteAcquire.InvokeAsync(new AcquireEventModel
         {
