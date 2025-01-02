@@ -24,7 +24,6 @@
         await jsRuntime.InvokeVoidAsync("k1_setConfig", twainOptions.ScannerInterface.Web);
         await jsRuntime.InvokeVoidAsync("k1_renderVisible", DotNetObjectReference.Create(this));
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        // await Task.Delay(4000);
         IsDisplayUI = true;
         await base.OnInitializedAsync();
     }

@@ -116,10 +116,6 @@
                 {
                     <div class="twain-feature-group">
                         <label class="scanning-label mt-2">Output File Type</label>
-                        @if (IsDisplayFileRestriction)
-                        {
-                            <span class="filetype-restriction">File types restricted for multiple page scans</span>
-                        }
                         <select class="form-control" value="@SelectedFileType" @onchange="@((ChangeEventArgs eventArgs) => HandleFileTypeChange(eventArgs?.Value?.ToString()))">
                             @foreach (var item in MappedFiletypes)
                             {
@@ -169,7 +165,6 @@
     private bool IsDisableScanButton = true;
     private bool IsDisplayScanningSection = false;
     private bool IsDisableFinalizeSection = true;
-    private bool IsDisplayFileRestriction = false;
     private bool IsDisplayOCR = false;
 
     public string SelectedDeviceId { get; set; }
@@ -207,7 +202,6 @@
 
         var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        // await Task.Delay(4000);
         IsDisplayUI = true;
         await base.OnInitializedAsync();
     }
@@ -219,7 +213,7 @@
 
         MappedDevices = devices.Select(x => new MappedOption<string> { Display = x.Name, Value = x.Id }).ToList();
         MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption<int> { Display = x.Key, Value = x.Value }).ToList();
-        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Value }).ToList();
+        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Key, Value = x.Value }).ToList();
 
         Filename = $"ScanFile{new Random().Next(2000000)}";
         IsDisplayScanningSection = true;
@@ -270,33 +264,7 @@
 
         try
         {
-            var response = await jsRuntime.InvokeAsync<ScanResponseModel>("k1_startScan", acquireRequest);
-            if (response.PageCount > 1)
-            {
-                IsDisplayFileRestriction = true;
-                if (
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.JPEG)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.GIF)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.BMP)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PNG)]
-                )
-                {
-                    SelectedFileType = TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.TIFF)];
-                }
-
-                MappedFiletypes = MappedFiletypes.Where(
-                  (fileType) =>
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PDF)] ||
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PDF_A)] ||
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.TIFF)]
-                ).ToList();
-            }
-            else
-            {
-                IsDisplayFileRestriction = false;
-                MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Value }).ToList();
-            }
-
+            await jsRuntime.InvokeAsync<ScanResponseModel>("k1_startScan", acquireRequest);
             IsDisableFinalizeSection = false;
             IsDisableScanButton = true;
         }
