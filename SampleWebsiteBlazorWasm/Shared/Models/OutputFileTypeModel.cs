@@ -7,7 +7,7 @@ namespace SampleWebsiteBlazorWasm.Shared.Models
         public string PDF { get; } = "PDF";
         public string PDF_A { get; } = "PDF/A";
         public string TIFF { get; } = "TIFF";
-        public string JPEG { get; } = "JPEG";
+        public string JPEG { get; } = "JPG";
         public string GIF { get; } = "GIF";
         public string BMP { get; } = "BMP";
         public string PNG { get; } = "PNG";

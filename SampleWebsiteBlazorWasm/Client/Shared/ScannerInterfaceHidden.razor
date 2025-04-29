@@ -21,82 +21,82 @@
         <div id="k1interface-hidden" class="show">
             <div class="@(IsDisableFinalizeSection ? "" : "section-disabled")">
                 <div class="twain-feature-group">
-                <label class="scanning-label mt-2">Device</label>
+                    <label class="scanning-label mt-2">Device</label>
                     <select value="@SelectedDeviceId" @onchange="@((ChangeEventArgs eventArgs) => HandleDeviceChange(eventArgs?.Value?.ToString()))" class="form-control">
-                    @foreach (var item in MappedDevices)
-                    {
-                        <option value="@item.Value">@item.Display</option>
-                    }
-                </select>
-            </div>
-
-            @if (MappedSources.Count > 0)
-            {
-                <div class="twain-feature-group">
-                    <label class="scanning-label mt-2">Document Source</label>
-
-                    <select @onchange="@((ChangeEventArgs eventArgs) => OnSourceChange(eventArgs?.Value?.ToString()))" class="form-control">
-                        @foreach (var item in MappedSources)
-                        {
-                            <option value="@item.Value">@item.Display</option>
-                        }
-                    </select>
-
-                </div>
-            }
-
-            @if (MappedResolutionIds.Count > 0)
-            {
-                <div class="twain-feature-group">
-                    <label class="scanning-label mt-2">Resolution</label>
-                    <select @bind="SelectedResolutionId" class="form-control">
-                        @foreach (var item in MappedResolutionIds)
-                        {
-                            <option value="@item.Value">@item.Display</option>
-                        }
-                    </select>
-
-                </div>
-            }
-
-            @if (MappedPixelTypeIds.Count > 0)
-            {
-                <div class="twain-feature-group">
-                    <label class="scanning-label mt-2">Color</label>
-                    <select @bind="SelectedPixelTypeId" class="form-control">
-                        @foreach (var item in MappedPixelTypeIds)
+                        @foreach (var item in MappedDevices)
                         {
                             <option value="@item.Value">@item.Display</option>
                         }
                     </select>
                 </div>
-            }
 
-            @if (MappedPageSizeIds.Count > 0)
-            {
-                <div class="twain-feature-group">
-                    <label class="scanning-label mt-2">Page Size</label>
-                    <select @bind="SelectedPageSizeId" class="form-control">
-                        @foreach (var item in MappedPageSizeIds)
-                        {
-                            <option value="@item.Value">@item.Display</option>
-                        }
-                    </select>
-                </div>
-            }
+                @if (MappedSources.Count > 0)
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Document Source</label>
 
-            @if (MappedDuplexIds.Count > 0)
-            {
-                <div class="twain-feature-group">
-                    <label class="scanning-label mt-2">Duplex Option</label>
-                    <select @bind="SelectedDuplexId" class="form-control">
-                        @foreach (var item in MappedDuplexIds)
-                        {
-                            <option value="@item.Value">@item.Display</option>
-                        }
-                    </select>
-                </div>
-            }
+                        <select value ="@SelectedSourceId" @onchange ="@((ChangeEventArgs eventArgs) => OnSourceChange(eventArgs?.Value?.ToString()))" class="form-control">
+                            @foreach (var item in MappedSources)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+
+                    </div>
+                }
+
+                @if (MappedResolutionIds.Count > 0)
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Resolution</label>
+                        <select value="@SelectedResolutionId" @onchange="@((ChangeEventArgs eventArgs) => HandleResolutionChange(eventArgs?.Value?.ToString()))" class="form-control">
+                            @foreach (var item in MappedResolutionIds)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+
+                    </div>
+                }
+
+                @if (MappedPixelTypeIds.Count > 0)
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Color</label>
+                        <select value="@SelectedPixelTypeId" @onchange="@((ChangeEventArgs eventArgs) => HandlePixelTypeChange(eventArgs?.Value?.ToString()))" class="form-control">
+                            @foreach (var item in MappedPixelTypeIds)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+                    </div>
+                }
+
+                @if (MappedPageSizeIds.Count > 0)
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Page Size</label>
+                        <select value="@SelectedPageSizeId" @onchange="@((ChangeEventArgs eventArgs) => HandlePageSizeChange(eventArgs?.Value?.ToString()))" class="form-control">
+                            @foreach (var item in MappedPageSizeIds)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+                    </div>
+                }
+
+                @if (MappedDuplexIds.Count > 0)
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Duplex Option</label>
+                        <select value="@SelectedDuplexId" @onchange="@((ChangeEventArgs eventArgs) => HandleDuplexChange(eventArgs?.Value?.ToString()))" class="form-control">
+                            @foreach (var item in MappedDuplexIds)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+                    </div>
+                }
                 <br />
                 <div class="input-group">
                     <div class="input-group-btn">
@@ -105,8 +105,8 @@
                         </button>
                     </div>
                 </div>
-             </div>
-             <div class="@(IsDisableFinalizeSection ? "section-disabled" : "")">
+            </div>
+            <div class="@(IsDisableFinalizeSection ? "section-disabled" : "")">
                 <div class="twain-feature-group">
                     <label class="scanning-label mt-2">Output File Name</label>
                     <input type="text" @bind="Filename" class="form-control" />
@@ -116,10 +116,6 @@
                 {
                     <div class="twain-feature-group">
                         <label class="scanning-label mt-2">Output File Type</label>
-                        @if (IsDisplayFileRestriction)
-                        {
-                            <span class="filetype-restriction">File types restricted for multiple page scans</span>
-                        }
                         <select class="form-control" value="@SelectedFileType" @onchange="@((ChangeEventArgs eventArgs) => HandleFileTypeChange(eventArgs?.Value?.ToString()))">
                             @foreach (var item in MappedFiletypes)
                             {
@@ -144,22 +140,22 @@
                 <div class="input-group mb-3 mt-3">
                     <div class="input-group-btn">
                         <button id="btn-attach" type="button" class="btn btn-primary" aria-label="Bold"
-                                @onclick="HandleAttachDocument">
+                        @onclick="HandleAttachDocument">
                             <span>ATTACH DOCUMENT</span>
                         </button>
                         <button id="btn-save-locally" type="button" class="btn btn-primary ml-2" aria-label="Bold"
-                                @onclick="HandleSaveDocument">
+                        @onclick="HandleSaveDocument">
                             <span>SAVE LOCALLY</span>
                         </button>
                         <button id="btn-cancel-finalization" type="button" class="btn btn-primary ml-2" aria-label="Bold"
-                                @onclick="HandleCancelFinalization">
+                        @onclick="HandleCancelFinalization">
                             <span>CANCEL</span>
                         </button>
                     </div>
                 </div>
-                 </div>
+            </div>
 
-            
+
         </div>
     }
 }
@@ -169,7 +165,6 @@
     private bool IsDisableScanButton = true;
     private bool IsDisplayScanningSection = false;
     private bool IsDisableFinalizeSection = true;
-    private bool IsDisplayFileRestriction = false;
     private bool IsDisplayOCR = false;
 
     public string SelectedDeviceId { get; set; }
@@ -207,7 +202,6 @@
 
         var configuration = await jsRuntime.InvokeAsync<object>("k1_renderDesktop");
         await jsRuntime.InvokeVoidAsync("k1_resetService");
-        // await Task.Delay(4000);
         IsDisplayUI = true;
         await base.OnInitializedAsync();
     }
@@ -219,17 +213,19 @@
 
         MappedDevices = devices.Select(x => new MappedOption<string> { Display = x.Name, Value = x.Id }).ToList();
         MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption<int> { Display = x.Key, Value = x.Value }).ToList();
-        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Value }).ToList();
+        MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Key, Value = x.Value }).ToList();
 
         Filename = $"ScanFile{new Random().Next(2000000)}";
         IsDisplayScanningSection = true;
 
         var scanSettings = await GetDefaultScanSettings();
+
         if (scanSettings != null)
         {
+            var deviceId = scanSettings?.ScannerDetails?.ScanSource ?? devices.FirstOrDefault()?.Id;
             SelectedFileType = scanSettings.ScanType;
             SelectedOcrType = scanSettings.UseOCR ? scanSettings.OCRType : TwainOptions.OcrType.None;
-            await HandleDeviceChange(scanSettings.ScanSource);
+            await HandleDeviceChange(deviceId);
         }
         else
         {
@@ -244,16 +240,30 @@
     private async Task<ScanSettingModel> GetDefaultScanSettings()
     {
         var scanSetting = await jsRuntime.InvokeAsync<object>("getDefaultScanSettings");
+
         if (scanSetting != null)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<ScanSettingModel>(scanSetting.ToString());
         }
+
         return null;
     }
 
-    private async Task SaveDefaultScanSettings(string outputType, int ocrType, string deviceId)
+    private async Task<ScannerDetails> GetScannerDetails(ScanSettingModel scanSettings)
     {
-        await jsRuntime.InvokeAsync<Task>("saveDefaultScanSettings", outputType, ocrType, deviceId);
+        var scannerDetails = await jsRuntime.InvokeAsync<object>("getScannerDetails", scanSettings);
+
+        if (scannerDetails != null)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ScannerDetails>(scannerDetails.ToString());
+        }
+
+        return null;
+    }
+
+    private async Task SaveDefaultScanSettings(string outputType, int ocrType, ScannerDetails scannerDetails = null)
+    {
+        await jsRuntime.InvokeAsync<Task>("saveDefaultScanSettings", outputType, ocrType, scannerDetails);
     }
 
     private async Task OnClick(MouseEventArgs mouseEventArgs)
@@ -270,33 +280,7 @@
 
         try
         {
-            var response = await jsRuntime.InvokeAsync<ScanResponseModel>("k1_startScan", acquireRequest);
-            if (response.PageCount > 1)
-            {
-                IsDisplayFileRestriction = true;
-                if (
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.JPEG)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.GIF)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.BMP)] ||
-                  SelectedFileType == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PNG)]
-                )
-                {
-                    SelectedFileType = TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.TIFF)];
-                }
-
-                MappedFiletypes = MappedFiletypes.Where(
-                  (fileType) =>
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PDF)] ||
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.PDF_A)] ||
-                    fileType.Value == TwainOptions.OutputFileType.OutputFileTypes[nameof(TwainOptions.OutputFileType.TIFF)]
-                ).ToList();
-            }
-            else
-            {
-                IsDisplayFileRestriction = false;
-                MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Value }).ToList();
-            }
-
+            await jsRuntime.InvokeAsync<ScanResponseModel>("k1_startScan", acquireRequest);
             IsDisableFinalizeSection = false;
             IsDisableScanButton = true;
         }
@@ -342,22 +326,16 @@
         SelectedFileType = outputType;
         IsDisplayOCR = SelectedFileType == TwainOptions.OutputFileType.PDF || SelectedFileType == TwainOptions.OutputFileType.PDF_A;
         var defaultSettings = await GetDefaultScanSettings();
-        await SaveDefaultScanSettings(
-          outputType,
-          defaultSettings?.OCRType ?? SelectedOcrType,
-          defaultSettings?.ScanSource ?? SelectedDeviceId
-        );
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        await SaveDefaultScanSettings(outputType, defaultSettings?.OCRType ?? SelectedOcrType, scannerDetails);
     }
 
     private async Task HandleOcrTypeChange(int ocrType)
     {
         SelectedOcrType = ocrType;
         var defaultSettings = await GetDefaultScanSettings();
-        await SaveDefaultScanSettings(
-           defaultSettings?.ScanType ?? SelectedFileType,
-          ocrType,
-          defaultSettings?.ScanSource ?? SelectedDeviceId
-        );
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        await SaveDefaultScanSettings(defaultSettings?.ScanType ?? SelectedFileType, ocrType, scannerDetails);
     }
 
     private async Task HandleSaveDocument(MouseEventArgs e)
@@ -406,6 +384,8 @@
     private async Task HandleDeviceChange(string deviceId)
     {
         var oDevice = await jsRuntime.InvokeAsync<object>("k1_getDevice", deviceId);
+        var defaultSettings = await GetDefaultScanSettings();
+
         if (oDevice is null)
         {
             IsDisableScanButton = true;
@@ -420,7 +400,6 @@
             SelectedPixelTypeId = string.Empty;
             SelectedSourceId = string.Empty;
             MappedSources.Clear();
-            StateHasChanged();
         }
         else
         {
@@ -431,21 +410,41 @@
 
             if (MappedSources != null && MappedSources.Any() && MappedSources.FirstOrDefault() != null)
             {
-                OnSourceChange(MappedSources.FirstOrDefault()?.Value);
+                var defaultDocumentSource = defaultSettings?.ScannerDetails?.DocumentSource;
+
+                if (string.IsNullOrWhiteSpace(defaultDocumentSource))
+                {
+                    defaultDocumentSource = MappedSources.FirstOrDefault()?.Value;
+                }
+
+                await OnSourceChange(defaultDocumentSource);
             }
-            StateHasChanged();
         }
 
-        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        scannerDetails.ScanSource = deviceId;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
+    }
+
+    bool IsJsonValueNull(string jsonValue)
+    {
+        return string.IsNullOrWhiteSpace(jsonValue) || jsonValue == "null";
+    }
+
+    private async Task SaveDefaultScannerDetails(ScanSettingModel defaultSettings, ScannerDetails scannerDetails)
+    {
         await SaveDefaultScanSettings(
           defaultSettings?.ScanType ?? SelectedFileType,
           defaultSettings?.OCRType ?? SelectedOcrType,
-          deviceId
+          scannerDetails
         );
     }
 
-    void OnSourceChange(string documentSourceId)
+    private async Task OnSourceChange(string documentSourceId)
     {
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+
         if (!SelectedDevice.DocumentSourceIds.ContainsKey(documentSourceId))
         {
             MappedDuplexIds = new List<MappedOption<string>>();
@@ -466,13 +465,54 @@
         MappedPageSizeIds = selectedDeviceUnit.PageSizeIds.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Key }).ToList();
         MappedPixelTypeIds = selectedDeviceUnit.PixelTypeIds.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Key }).ToList();
         MappedResolutionIds = selectedDeviceUnit.ResolutionIds.Select(x => new MappedOption<string> { Display = x.Value, Value = x.Key }).ToList();
-               
-        SelectedSourceId = documentSourceId;
-        SelectedResolutionId = MappedResolutionIds.FirstOrDefault()?.Value;
-        SelectedDuplexId = MappedDuplexIds.FirstOrDefault()?.Value;
-        SelectedPageSizeId = MappedPageSizeIds.FirstOrDefault()?.Value;
-        SelectedPixelTypeId = MappedPixelTypeIds.FirstOrDefault()?.Value;
 
-        StateHasChanged();
+        SelectedSourceId = documentSourceId;
+        SelectedResolutionId = scannerDetails?.Resolution ?? MappedResolutionIds.FirstOrDefault()?.Value;
+        SelectedDuplexId = scannerDetails?.Duplex ?? MappedDuplexIds.FirstOrDefault()?.Value;
+        SelectedPageSizeId = scannerDetails?.PageSize ?? MappedPageSizeIds.FirstOrDefault()?.Value;
+        SelectedPixelTypeId = scannerDetails?.Color ?? MappedPixelTypeIds.FirstOrDefault()?.Value;
+
+        scannerDetails.DocumentSource = documentSourceId;
+        scannerDetails.Resolution = SelectedResolutionId;
+        scannerDetails.Duplex = SelectedDuplexId;
+        scannerDetails.PageSize = SelectedPageSizeId;
+        scannerDetails.Color = SelectedPixelTypeId;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
+    }
+
+    private async Task HandleResolutionChange(string selectedResolution)
+    {
+        SelectedResolutionId = selectedResolution;
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        scannerDetails.Resolution = selectedResolution;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
+    }
+
+    private async Task HandlePixelTypeChange(string selectedPixelType)
+    {
+        SelectedPixelTypeId = selectedPixelType;
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        scannerDetails.Color = selectedPixelType;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
+    }
+
+    private async Task HandlePageSizeChange(string selectedPageSize)
+    {
+        SelectedPageSizeId = selectedPageSize;
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        scannerDetails.PageSize = selectedPageSize;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
+    }
+
+    private async Task HandleDuplexChange(string selectedDuplex)
+    {
+        SelectedDuplexId = selectedDuplex;
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+        scannerDetails.Duplex = selectedDuplex;
+        await SaveDefaultScannerDetails(defaultSettings, scannerDetails);
     }
 }
