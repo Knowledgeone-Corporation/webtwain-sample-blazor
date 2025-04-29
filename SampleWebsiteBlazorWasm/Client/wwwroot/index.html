@@ -149,24 +149,24 @@
             });
         }
 
-        async function saveDefaultScanSettings(outputType, ocrType, scanSource) {
+        async function saveDefaultScanSettings(outputType, ocrType, scannerDetails = null) {
+            let scanSettings = getDefaultScanSettings();
+
             let isUseOcr = (outputType === K1WebTwain.Options.OutputFiletype.PDF ||
                 outputType === K1WebTwain.Options.OutputFiletype['PDF/A']) &&
                 parseInt(ocrType) !== K1WebTwain.Options.OcrType.None;
-
-            let scanSettings = getDefaultScanSettings();
 
             if (scanSettings) {
                 scanSettings.ScanType = outputType;
                 scanSettings.UseOCR = isUseOcr;
                 scanSettings.OCRType = ocrType;
-                scanSettings.ScanSource = scanSource;
+                scanSettings.ScannerDetails = parseScannerDetails(scannerDetails) ?? await getScannerDetails(scanSettings);
             } else {
                 scanSettings = {
                     ScanType: outputType,
                     UseOCR: isUseOcr,
                     OCRType: ocrType,
-                    ScanSource: scanSource
+                    ScannerDetails: parseScannerDetails(scannerDetails) ?? await getScannerDetails(null)
                 }
             }
 
@@ -205,6 +205,22 @@
             }
 
             return null;
+        }
+
+        async function getScannerDetails(scanSettings) {
+            const defaultScannerDetails = scanSettings?.ScannerDetails ?? scanSettings?.scannerDetails;
+            return parseScannerDetails(defaultScannerDetails);
+        }
+
+        function parseScannerDetails(defaultScannerDetails) {
+            return {
+                ScanSource: defaultScannerDetails?.ScanSource ?? defaultScannerDetails?.scanSource,
+                DocumentSource: defaultScannerDetails?.DocumentSource ?? defaultScannerDetails?.documentSource,
+                Resolution: defaultScannerDetails?.Resolution ?? defaultScannerDetails?.resolution,
+                Color: defaultScannerDetails?.Color ?? defaultScannerDetails?.color,
+                PageSize: defaultScannerDetails?.PageSize ?? defaultScannerDetails?.pageSize,
+                Duplex: defaultScannerDetails?.Duplex ?? defaultScannerDetails?.duplex
+            };
         }
     </script>
 </body>
