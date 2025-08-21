@@ -7,6 +7,7 @@
         public PagePlacementModel PagePlacement { get; set; }
         public OutputFileTypeModel OutputFileType { get; set; }
         public SaveToTypeModel SaveToType { get; set; }
+        public FileCompressionTypeModel FileCompressionType { get; set; }
     }
 
 }

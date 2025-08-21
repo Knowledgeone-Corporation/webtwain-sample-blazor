@@ -6,6 +6,7 @@
         public bool UseOCR { get; set; }
         public int OCRType { get; set; }
         public string ScanType { get; set; }
+        public int FileCompressionType { get; set; }
     }
 
     public class ScannerDetails

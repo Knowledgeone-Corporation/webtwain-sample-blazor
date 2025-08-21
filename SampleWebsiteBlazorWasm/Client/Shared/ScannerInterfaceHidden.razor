@@ -125,6 +125,20 @@
                     </div>
                 }
 
+                @* --- Compression Option --- *@
+                @if (MappedCompressionOptions.Any())
+                {
+                    <div class="twain-feature-group">
+                        <label class="scanning-label mt-2">Output File Compression</label>
+                        <select class="form-control" value="@SelectedCompressionType" @onchange="@((ChangeEventArgs eventArgs) => HandleCompressionChange(int.Parse(eventArgs?.Value?.ToString())))">
+                            @foreach (var item in MappedCompressionOptions)
+                            {
+                                <option value="@item.Value">@item.Display</option>
+                            }
+                        </select>
+                    </div>
+                }
+
                 @if (IsDisplayOCR && MappedOcrOptions.Any())
                 {
                     <div class="twain-feature-group">
@@ -170,6 +184,7 @@
     public string SelectedDeviceId { get; set; }
     public DeviceModel SelectedDevice { get; set; } = null;
     public int SelectedOcrType { get; set; }
+    public int SelectedCompressionType { get; set; }
     public string SelectedInterfaceType { get; set; }
     public string SelectedFileType { get; set; }
     public List<DeviceModel> Devices { get; set; } = new List<DeviceModel>();
@@ -191,6 +206,8 @@
 
     public List<MappedOption<int>> MappedOcrOptions { get; set; } = new List<MappedOption<int>>();
     public List<MappedOption<string>> MappedFiletypes { get; set; } = new List<MappedOption<string>>();
+    public List<MappedOption<int>> MappedCompressionOptions { get; set; } = new List<MappedOption<int>>();
+
 
     [Parameter]
     public EventCallback<AcquireEventModel> CompleteAcquire {get; set;}
@@ -214,6 +231,7 @@
         MappedDevices = devices.Select(x => new MappedOption<string> { Display = x.Name, Value = x.Id }).ToList();
         MappedOcrOptions = TwainOptions.OcrType.OcrTypes.Select(x => new MappedOption<int> { Display = x.Key, Value = x.Value }).ToList();
         MappedFiletypes = TwainOptions.OutputFileType.OutputFileTypes.Select(x => new MappedOption<string> { Display = x.Key, Value = x.Value }).ToList();
+        MappedCompressionOptions = TwainOptions.FileCompressionType.FileCompressionTypes.Select(x => new MappedOption<int> { Display = x.Key, Value = x.Value }).ToList();
 
         Filename = $"ScanFile{new Random().Next(2000000)}";
         IsDisplayScanningSection = true;
@@ -225,12 +243,14 @@
             var deviceId = scanSettings?.ScannerDetails?.ScanSource ?? devices.FirstOrDefault()?.Id;
             SelectedFileType = scanSettings.ScanType;
             SelectedOcrType = scanSettings.UseOCR ? scanSettings.OCRType : TwainOptions.OcrType.None;
+            SelectedCompressionType = scanSettings.FileCompressionType;
             await HandleDeviceChange(deviceId);
         }
         else
         {
             SelectedOcrType = TwainOptions.OcrType.None;
             SelectedFileType = TwainOptions.OutputFileType.PDF;
+            SelectedCompressionType = TwainOptions.FileCompressionType.None;
             await HandleDeviceChange(devices.FirstOrDefault()?.Id);
         }
 
@@ -261,9 +281,9 @@
         return null;
     }
 
-    private async Task SaveDefaultScanSettings(string outputType, int ocrType, ScannerDetails scannerDetails = null)
+    private async Task SaveDefaultScanSettings(string outputType, int ocrType, ScannerDetails scannerDetails = null, int compressionType = 0)
     {
-        await jsRuntime.InvokeAsync<Task>("saveDefaultScanSettings", outputType, ocrType, scannerDetails);
+        await jsRuntime.InvokeAsync<Task>("saveDefaultScanSettings", outputType, ocrType, scannerDetails, compressionType);
     }
 
     private async Task OnClick(MouseEventArgs mouseEventArgs)
@@ -301,6 +321,7 @@
         {
             ocrType = this.SelectedOcrType,
             fileType = this.SelectedFileType,
+            fileCompressionType = this.SelectedCompressionType,
             saveToType = TwainOptions.SaveToType.Upload,
             outputFilename = this.Filename,
             callbackFunctionName = "UploadDocument"
@@ -321,13 +342,29 @@
         }
     }
 
+    private async Task HandleCompressionChange(int compressionType)
+    {
+        SelectedCompressionType = compressionType;
+        var defaultSettings = await GetDefaultScanSettings();
+        var scannerDetails = await GetScannerDetails(defaultSettings);
+
+        await SaveDefaultScanSettings(
+          defaultSettings?.ScanType ?? SelectedFileType,
+          defaultSettings?.OCRType ?? SelectedOcrType,
+          scannerDetails,
+          compressionType
+        );
+    }
+
     private async Task HandleFileTypeChange(string outputType)
     {
         SelectedFileType = outputType;
         IsDisplayOCR = SelectedFileType == TwainOptions.OutputFileType.PDF || SelectedFileType == TwainOptions.OutputFileType.PDF_A;
         var defaultSettings = await GetDefaultScanSettings();
         var scannerDetails = await GetScannerDetails(defaultSettings);
-        await SaveDefaultScanSettings(outputType, defaultSettings?.OCRType ?? SelectedOcrType, scannerDetails);
+
+        await SaveDefaultScanSettings(outputType, defaultSettings?.OCRType ?? SelectedOcrType, scannerDetails,
+          defaultSettings?.FileCompressionType ?? SelectedCompressionType);
     }
 
     private async Task HandleOcrTypeChange(int ocrType)
@@ -335,7 +372,9 @@
         SelectedOcrType = ocrType;
         var defaultSettings = await GetDefaultScanSettings();
         var scannerDetails = await GetScannerDetails(defaultSettings);
-        await SaveDefaultScanSettings(defaultSettings?.ScanType ?? SelectedFileType, ocrType, scannerDetails);
+
+        await SaveDefaultScanSettings(defaultSettings?.ScanType ?? SelectedFileType, ocrType, scannerDetails,
+          defaultSettings?.FileCompressionType ?? SelectedCompressionType);
     }
 
     private async Task HandleSaveDocument(MouseEventArgs e)
@@ -344,6 +383,7 @@
         {
             ocrType = this.SelectedOcrType,
             fileType = this.SelectedFileType,
+            fileCompressionType = this.SelectedCompressionType,
             saveToType = TwainOptions.SaveToType.Local,
             outputFilename = this.Filename,
             callbackFunctionName = "SaveDocument"
@@ -436,7 +476,8 @@
         await SaveDefaultScanSettings(
           defaultSettings?.ScanType ?? SelectedFileType,
           defaultSettings?.OCRType ?? SelectedOcrType,
-          scannerDetails
+          scannerDetails,
+          defaultSettings?.FileCompressionType ?? SelectedCompressionType
         );
     }
 
