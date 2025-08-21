@@ -117,12 +117,14 @@
             K1WebTwain.ValidatePageSize({
                 filetype: request.fileType,
                 ocrType: request.ocrType,
+                fileCompressionType: request.fileCompressionType,
                 saveToType: request.saveToType,
                 generateDocument: async() => {
                     try {
                         let response = await K1WebTwain.GenerateDocument({
                             filetype: request.fileType,
                             ocrType: request.ocrType,
+                            fileCompressionType: request.fileCompressionType,
                             saveToType: request.saveToType,
                             filename: request.outputFilename,
                         });
@@ -149,24 +151,28 @@
             });
         }
 
-        async function saveDefaultScanSettings(outputType, ocrType, scannerDetails = null) {
+        async function saveDefaultScanSettings(outputType, ocrType, scannerDetails = null, fileCompressionType = null) {
             let scanSettings = getDefaultScanSettings();
 
             let isUseOcr = (outputType === K1WebTwain.Options.OutputFiletype.PDF ||
                 outputType === K1WebTwain.Options.OutputFiletype['PDF/A']) &&
                 parseInt(ocrType) !== K1WebTwain.Options.OcrType.None;
 
+            console.log(fileCompressionType)
+
             if (scanSettings) {
                 scanSettings.ScanType = outputType;
                 scanSettings.UseOCR = isUseOcr;
                 scanSettings.OCRType = ocrType;
                 scanSettings.ScannerDetails = parseScannerDetails(scannerDetails) ?? await getScannerDetails(scanSettings);
+                scanSettings.FileCompressionType = fileCompressionType ?? scanSettings.FileCompressionType;
             } else {
                 scanSettings = {
                     ScanType: outputType,
                     UseOCR: isUseOcr,
                     OCRType: ocrType,
-                    ScannerDetails: parseScannerDetails(scannerDetails) ?? await getScannerDetails(null)
+                    ScannerDetails: parseScannerDetails(scannerDetails) ?? await getScannerDetails(null),
+                    FileCompressionType: fileCompressionType
                 }
             }
 
